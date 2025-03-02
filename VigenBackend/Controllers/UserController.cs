@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.Extensions.Configuration;
 
 namespace Vigen_Repository.Controllers
 {
@@ -15,9 +16,11 @@ namespace Vigen_Repository.Controllers
     public class UserController : ControllerBase
     {
         private readonly vigendbContext _context;
-        public UserController(vigendbContext context)
+        private readonly IConfiguration _configuration;
+        public UserController(vigendbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
         [HttpGet]
         public async Task<ActionResult<List<User>>> getUsers()
@@ -40,8 +43,14 @@ namespace Vigen_Repository.Controllers
             }
 
             // Si la autenticación es exitosa, genera el token JWT
+            var secretKey = _configuration["JwtSettings:Secret"];
+            if (string.IsNullOrEmpty(secretKey))
+            {
+                return StatusCode(500, "JWT Secret Key is missing in configuration");
+            }
+
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes("sB9fD4@1k3LsTq8PzV7dGxA2!wR4uY6H"); // Cambia por una clave secreta más robusta
+            var key = Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"]);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[] {
