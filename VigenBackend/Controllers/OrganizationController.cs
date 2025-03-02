@@ -50,7 +50,6 @@ namespace Vigen_Repository.Controllers
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(secretKey);
-            var key = Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"]);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[] {
