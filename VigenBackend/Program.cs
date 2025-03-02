@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Vigen_Repository.Models;
@@ -9,6 +10,15 @@ string corsConfiguration = "_corsConfiguration";
 
 // Cargar configuración de JWT desde appsettings.json
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+
+var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET");
+
+if (string.IsNullOrWhiteSpace(secretKey))
+{
+    throw new InvalidOperationException("JWT Secret Key is missing. Set it in environment variables.");
+}
+
+var key = Encoding.UTF8.GetBytes(secretKey);
 
 // Agregar servicios
 builder.Services.AddControllers();
@@ -44,7 +54,7 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Secret"])), // ✅ Se obtiene de appsettings.json
+        IssuerSigningKey = new SymmetricSecurityKey(key), // ✅ Ahora usa solo `secretKey`
         ValidateIssuer = true,
         ValidIssuer = jwtSettings["Issuer"],
         ValidateAudience = true,

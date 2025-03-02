@@ -41,14 +41,15 @@ namespace Vigen_Repository.Controllers
                 return Unauthorized(new { message = "Invalid username or password" });
             }
 
-            var secretKey = _configuration["JwtSettings:Secret"];
-            if (string.IsNullOrEmpty(secretKey))
+            var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET");
+
+            if (string.IsNullOrWhiteSpace(secretKey))
             {
-                return StatusCode(500, "JWT Secret Key is missing in configuration");
+                return StatusCode(500, "JWT Secret Key is missing. Set it in environment variables or appsettings.json.");
             }
 
-            // Si la autenticación es exitosa, genera el token JWT
             var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(secretKey);
             var key = Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"]);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
