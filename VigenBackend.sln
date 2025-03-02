@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35728.132 d17.12
+VisualStudioVersion = 17.12.35728.132
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VigenBackend", "VigenBackend\VigenBackend.csproj", "{3D4A976A-942A-49FE-B5A3-EFBDC5641867}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VigenBackend.Tests", "VigenBackend.Tests\VigenBackend.Tests.csproj", "{02E253E0-073B-44C9-BA74-391878224EA5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{3D4A976A-942A-49FE-B5A3-EFBDC5641867}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D4A976A-942A-49FE-B5A3-EFBDC5641867}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D4A976A-942A-49FE-B5A3-EFBDC5641867}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02E253E0-073B-44C9-BA74-391878224EA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02E253E0-073B-44C9-BA74-391878224EA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02E253E0-073B-44C9-BA74-391878224EA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02E253E0-073B-44C9-BA74-391878224EA5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
