@@ -83,14 +83,11 @@ app.UseCors(corsConfiguration);
 
 app.UseRouting();
 
-app.UseEndpoints(enpoint =>
+app.UseEndpoints(endpoints =>
 {
-    enpoint.MapHub<BroadCastHub>("/NotifyHub");
+    endpoints.MapHub<BroadCastHub>("/NotifyHub");
+    endpoints.MapControllers(); // <-- aquí van juntos
 });
 
-app.UseEndpoints(enpoint =>
-{
-    enpoint.MapControllers();
-});
 
 app.Run();
