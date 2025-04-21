@@ -37,7 +37,7 @@ builder.Services.AddCors(options =>
         builder.AllowCredentials();
         builder.AllowAnyHeader();
         builder.AllowAnyMethod();
-        builder.WithOrigins("http://localhost:5173");
+        builder.WithOrigins("http://localhost:5173", "https://vigen-react.vercel.app");
     });
 });
 
