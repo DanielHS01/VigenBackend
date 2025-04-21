@@ -23,7 +23,7 @@ var key = Encoding.UTF8.GetBytes(secretKey);
 // Agregar servicios
 builder.Services.AddControllers();
 builder.Services.AddDbContext<vigendbContext>(options=>
-options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
