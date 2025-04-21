@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Vigen_Repository</RootNamespace>
     <UserSecretsId>635c62ad-94e4-4132-9314-ae24ab78caaa</UserSecretsId>
+	<RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
