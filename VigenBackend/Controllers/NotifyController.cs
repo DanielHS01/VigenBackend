@@ -21,7 +21,6 @@ namespace Vigen_Repository.Controllers
         public async Task<ActionResult<List<Notify>>> getNotifies()
         {
             List<Notify> notifies = await _context.Notifies.ToListAsync();
-            if (notifies.Count == 0) return NoContent();
             return Ok(notifies);
         }
 
@@ -91,6 +90,71 @@ namespace Vigen_Repository.Controllers
                 return BadRequest(ex);
             }
 
+        }
+
+        [HttpGet("reporte/pdf")]
+        public async Task<IActionResult> DescargarReporteNotificaciones()
+        {
+            var notifies = await _context.Notifies.ToListAsync();
+
+            if (notifies.Count == 0)
+            {
+                return NoContent();
+            }
+
+            using (var stream = new MemoryStream())
+            {
+                var document = new PdfSharpCore.Pdf.PdfDocument();
+                var page = document.AddPage();
+                var gfx = PdfSharpCore.Drawing.XGraphics.FromPdfPage(page);
+                var font = new PdfSharpCore.Drawing.XFont("Arial", 10, PdfSharpCore.Drawing.XFontStyle.Regular);
+                var boldFont = new PdfSharpCore.Drawing.XFont("Arial", 12, PdfSharpCore.Drawing.XFontStyle.Bold);
+
+                double y = 40;
+                double marginLeft = 40;
+
+                // Título
+                gfx.DrawString("Reporte de Notificaciones", boldFont, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XPoint(marginLeft, y - 20));
+
+                // Encabezados de tabla
+                gfx.DrawString("ID", boldFont, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XPoint(marginLeft, y));
+                gfx.DrawString("Usuario", boldFont, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XPoint(marginLeft + 50, y));
+                gfx.DrawString("Título", boldFont, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XPoint(marginLeft + 200, y));
+                gfx.DrawString("Estado", boldFont, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XPoint(marginLeft + 400, y));
+                gfx.DrawString("Fecha", boldFont, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XPoint(marginLeft + 480, y));
+
+                y += 25;
+
+                foreach (var notify in notifies)
+                {
+                    if (y > page.Height - 40)
+                    {
+                        page = document.AddPage();
+                        gfx = PdfSharpCore.Drawing.XGraphics.FromPdfPage(page);
+                        y = 40;
+                    }
+
+                    string estadoTexto = notify.StateId switch
+                    {
+                        0 => "Activa",
+                        1 => "En Progreso",
+                        _ => "Finalizada"
+                    };
+
+                    gfx.DrawString(notify.Id.ToString(), font, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XPoint(marginLeft, y));
+                    gfx.DrawString(notify.UserId, font, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XPoint(marginLeft + 50, y));
+                    gfx.DrawString(notify.Title, font, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XPoint(marginLeft + 200, y));
+                    gfx.DrawString(estadoTexto, font, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XPoint(marginLeft + 400, y));
+                    gfx.DrawString(notify.Date.ToString("yyyy-MM-dd"), font, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XPoint(marginLeft + 480, y));
+
+                    y += 20;
+                }
+
+                document.Save(stream);
+                stream.Position = 0;
+
+                return File(stream.ToArray(), "application/pdf", "reporte_alertas.pdf");
+            }
         }
     }
 }

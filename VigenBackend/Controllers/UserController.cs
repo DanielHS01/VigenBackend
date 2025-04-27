@@ -186,5 +186,59 @@ namespace Vigen_Repository.Controllers
             }
             
         }
+
+        [HttpGet("reporte/pdf")]
+        public async Task<IActionResult> DescargarReporteUsuarios()
+        {
+            var users = await _context.Users.ToListAsync();
+
+            if (users.Count == 0)
+            {
+                return NoContent();
+            }
+
+            using (var stream = new MemoryStream())
+            {
+                var document = new PdfSharpCore.Pdf.PdfDocument();
+                var page = document.AddPage();
+                var gfx = PdfSharpCore.Drawing.XGraphics.FromPdfPage(page);
+                var font = new PdfSharpCore.Drawing.XFont("Arial", 12, PdfSharpCore.Drawing.XFontStyle.Regular);
+                var boldFont = new PdfSharpCore.Drawing.XFont("Arial", 12, PdfSharpCore.Drawing.XFontStyle.Bold);
+
+                double y = 40;
+                double marginLeft = 40;
+
+                // Título
+                gfx.DrawString("Reporte de Usuarios", boldFont, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XPoint(marginLeft, y - 20));
+
+                // Encabezados de tabla
+                gfx.DrawString("Nombre", boldFont, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XPoint(marginLeft, y));
+                gfx.DrawString("Email", boldFont, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XPoint(marginLeft + 150, y));
+                gfx.DrawString("ID", boldFont, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XPoint(marginLeft + 400, y));
+
+                y += 25;
+
+                foreach (var user in users)
+                {
+                    if (y > page.Height - 40)
+                    {
+                        page = document.AddPage();
+                        gfx = PdfSharpCore.Drawing.XGraphics.FromPdfPage(page);
+                        y = 40;
+                    }
+
+                    gfx.DrawString(user.Name, font, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XPoint(marginLeft, y));
+                    gfx.DrawString(user.Email, font, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XPoint(marginLeft + 150, y));
+                    gfx.DrawString(user.Identification, font, PdfSharpCore.Drawing.XBrushes.Black, new PdfSharpCore.Drawing.XPoint(marginLeft + 400, y));
+
+                    y += 20;
+                }
+
+                document.Save(stream);
+                stream.Position = 0;
+
+                return File(stream.ToArray(), "application/pdf", "reporte_usuarios.pdf");
+            }
+        }
     }
 }
