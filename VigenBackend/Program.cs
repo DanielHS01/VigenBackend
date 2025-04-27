@@ -73,15 +73,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseRouting();
+app.UseCors(corsConfiguration);
 app.UseAuthentication(); // Este middleware debe estar antes de Authorization
+app.UseAuthorization();
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
 
-app.UseCors(corsConfiguration);
 
-app.UseRouting();
 
 app.UseEndpoints(endpoints =>
 {
