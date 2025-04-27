@@ -102,13 +102,15 @@ namespace Vigen_Repository.Controllers
                 return NoContent();
             }
 
+            PdfSharpCore.Fonts.GlobalFontSettings.FontResolver = new FontResolver();
+
             using (var stream = new MemoryStream())
             {
                 var document = new PdfSharpCore.Pdf.PdfDocument();
                 var page = document.AddPage();
                 var gfx = PdfSharpCore.Drawing.XGraphics.FromPdfPage(page);
-                var font = new PdfSharpCore.Drawing.XFont("Arial", 10, PdfSharpCore.Drawing.XFontStyle.Regular);
-                var boldFont = new PdfSharpCore.Drawing.XFont("Arial", 12, PdfSharpCore.Drawing.XFontStyle.Bold);
+                var font = new PdfSharpCore.Drawing.XFont("LiberationSans#", 10, PdfSharpCore.Drawing.XFontStyle.Regular);
+                var boldFont = new PdfSharpCore.Drawing.XFont("LiberationSans#", 12, PdfSharpCore.Drawing.XFontStyle.Bold);
 
                 double y = 40;
                 double marginLeft = 40;
