@@ -197,8 +197,6 @@ namespace Vigen_Repository.Controllers
                 return NoContent();
             }
 
-            PdfSharpCore.Fonts.GlobalFontSettings.FontResolver = new FontResolver();
-
             using (var stream = new MemoryStream())
             {
                 var document = new PdfSharpCore.Pdf.PdfDocument();

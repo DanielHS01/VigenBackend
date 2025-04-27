@@ -64,6 +64,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+PdfSharpCore.Fonts.GlobalFontSettings.FontResolver = new FontResolver();
+
 var app = builder.Build();
 
 // Configurar el pipeline de la aplicación
