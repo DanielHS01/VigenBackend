@@ -22,6 +22,7 @@ var key = Encoding.UTF8.GetBytes(secretKey);
 
 // Agregar servicios
 builder.Services.AddControllers();
+builder.Services.AddHttpClient();
 builder.Services.AddDbContext<vigendbContext>(options=>
 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -63,6 +64,7 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero
     };
 });
+
 
 PdfSharpCore.Fonts.GlobalFontSettings.FontResolver = new FontResolver();
 
