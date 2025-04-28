@@ -69,8 +69,8 @@ namespace Vigen_Repository.Controllers
                 name = orgObject.Name,
                 nit = orgObject.Nit,
                 tel = orgObject.Tel, // Asume que hay un campo para la información de contacto
-                phone = orgObject.Phone // Asume que hay un campo para la dirección
-                                            // Agrega otros campos que sean relevantes
+                phone = orgObject.Phone, // Asume que hay un campo para la dirección
+                organizationType = orgObject.OrganizationTypeID                            // Agrega otros campos que sean relevantes
             });
         }
 
