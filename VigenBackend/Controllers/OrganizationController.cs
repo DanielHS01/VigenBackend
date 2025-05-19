@@ -36,7 +36,7 @@ namespace Vigen_Repository.Controllers
             Organization? orgObject = await _context.Organizations.FirstOrDefaultAsync(o => o.Nit == user); // Asumiendo que `Identification` es el campo que identifica a la organización
 
             // Si no se encuentra la organización o la contraseña no coincide
-            if (orgObject == null || orgObject.Password != password)
+            if (orgObject == null || !BCrypt.Net.BCrypt.Verify(password, orgObject.Password))
             {
                 return Unauthorized(new { message = "Invalid username or password" });
             }
@@ -87,6 +87,7 @@ namespace Vigen_Repository.Controllers
         {
             try
             {
+                organization.Password = BCrypt.Net.BCrypt.HashPassword(organization.Password);
                 await _context.Organizations.AddAsync(organization);
                 await _context.SaveChangesAsync();
                 return Ok(organization);
@@ -100,9 +101,19 @@ namespace Vigen_Repository.Controllers
         [HttpPut("{nit}")]
         public async Task<ActionResult<Organization>> UpdateOrganization(string nit, Organization organization)
         {
-            if (nit != organization.Nit) return BadRequest("El Nit no concide");
+            if (nit != organization.Nit) return BadRequest("El Nit no coincide");
+
             try
             {
+                var existingOrg = await _context.Organizations.AsNoTracking().FirstOrDefaultAsync(o => o.Nit == nit);
+                if (existingOrg == null) return NotFound();
+
+                // Si la contraseña cambió, la encriptamos
+                if (existingOrg.Password != organization.Password)
+                {
+                    organization.Password = BCrypt.Net.BCrypt.HashPassword(organization.Password);
+                }
+
                 _context.Entry(organization).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
 
@@ -130,6 +141,27 @@ namespace Vigen_Repository.Controllers
                 return BadRequest(ex);
             }
 
+        }
+
+        public class ResetPasswordRequest
+        {
+            public string NewPassword { get; set; }
+        }
+
+
+        [HttpPut("reset-password/{nit}")]
+        public async Task<IActionResult> ResetPassword(string nit, [FromBody] ResetPasswordRequest request)
+        {
+            var org = await _context.Organizations.FirstOrDefaultAsync(o => o.Nit == nit);
+            if (org == null) return NotFound("Organización no encontrada");
+
+            // Encriptar la nueva contraseña
+            org.Password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+
+            _context.Organizations.Update(org);
+            await _context.SaveChangesAsync();
+
+            return Ok("Contraseña actualizada exitosamente");
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Vigen_Repository.Controllers
             User? userObject = await _context.Users.FirstOrDefaultAsync(u => u.Identification == user);
 
             // Si no se encuentra el usuario o la contraseña no coincide
-            if (userObject == null || userObject.Password != password)
+            if (userObject == null || !BCrypt.Net.BCrypt.Verify(password, userObject.Password))
             {
                 return Unauthorized(new { message = "Invalid username or password" });
             }
@@ -89,7 +89,7 @@ namespace Vigen_Repository.Controllers
         public async Task<ActionResult<User>> getUser(string id)
         {
             User? user = await _context.Users.FindAsync(id);
-            if(user == null) return NotFound();
+            if (user == null) return NotFound();
             return Ok(user);
         }
 
@@ -98,8 +98,12 @@ namespace Vigen_Repository.Controllers
         {
             try
             {
+                // Encriptar la contraseña antes de guardar
+                user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+
                 await _context.Users.AddAsync(user);
                 await _context.SaveChangesAsync();
+
                 Send send = new Send();
                 var res = send.enviar(user.Email, user.Code);
             }
@@ -118,13 +122,23 @@ namespace Vigen_Repository.Controllers
 
             try
             {
+                var existingUser = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Identification == id);
+                if (existingUser == null)
+                    return NotFound(new { message = "Usuario no encontrado." });
+
+                // Si la contraseña cambió, la encriptamos
+                if (existingUser.Password != user.Password)
+                {
+                    user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+                }
+
                 _context.Entry(user).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
+
                 return Ok(user);
             }
             catch (Exception ex)
             {
-                // Retorna un JSON con el mensaje de error
                 return BadRequest(new { message = ex.Message });
             }
         }
@@ -175,16 +189,63 @@ namespace Vigen_Repository.Controllers
             try
             {
                 User? user = await _context.Users.FindAsync(id);
-                if(user==null) return NotFound();
+                if (user == null) return NotFound();
                 _context.Users.Remove(user);
                 await _context.SaveChangesAsync();
                 return Ok(user);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(ex);
             }
-            
+
+        }
+
+        [HttpPut("reset-password/{id}")]
+        public async Task<IActionResult> ResetPassword(string id)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(o => o.Identification == id);
+            if (user == null) return NotFound("Usuario no encontrado");
+
+            // Generar contraseña aleatoria
+            var newPassword = GenerateRandomPassword(8);
+            user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            // Enviar correo
+            Reset reset = new Reset();
+            var res = reset.EnviarNuevaContrasena(user.Email, newPassword);
+
+            return Ok("Nueva contraseña enviada al correo");
+        }
+
+        // Método auxiliar para generar contraseña aleatoria
+        private string GenerateRandomPassword(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        [HttpPut("resend-code")]
+        public async Task<IActionResult> ResendCode([FromBody] ResendCodeRequest request)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Identification == request.Identification);
+            if (user == null)
+                return NotFound("Usuario no encontrado");
+
+            Send send = new Send();
+            var emailResult = send.enviar(user.Email, user.Code);
+
+            return Ok("Código reenviado");
+        }
+
+        public class ResendCodeRequest
+        {
+            public string Identification { get; set; }
         }
 
         [HttpGet("reporte/pdf")]
