@@ -17,7 +17,7 @@ namespace Vigen_Repository.Controllers
         [HttpGet("{nit}")]
         public async Task<ActionResult<List<Site>>> getSites(string nit)
         {
-            List<Site> sites = _context.Sites.Where(x => x.Id == nit).ToList();
+            List<Site> sites = _context.Sites.Where(x => x.Nit == nit).ToList();
             if (sites.Count == 0) return NoContent();
             return Ok(sites);
         }
